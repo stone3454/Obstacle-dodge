@@ -1,0 +1,124 @@
+gamemanager.cs
+using UnityEngine;
+using UnityEngine.SceneManagement;
+public class gamemanager : MonoBehaviour
+{   
+
+    bool gameHasEnded = false;
+
+    public float restartDealy = 1f;
+    
+    public GameObject completelevelUI; 
+
+    public void CompleteLevel()
+    {
+
+        completelevelUI.SetActive(true);
+
+
+    }
+
+    public void EndGame ()
+    {    if (gameHasEnded == false )
+        { 
+            gameHasEnded = true; 
+            Debug.Log("GAME OVER");
+            Invoke("Restart", 2f);          
+        } 
+    }
+
+        void Restart()
+        {
+
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        }
+
+}
+Endtrigger.cs
+using UnityEngine;
+
+public class Endtrigger : MonoBehaviour
+{
+    public gamemanager GameManager;
+
+   void OnTriggerEnter ()
+   {
+    
+       gamemanager.CompleteLevel(); // here is the problem
+
+   }
+
+}
+
+playercolission.cs
+using UnityEngine;
+
+public class playercolission : MonoBehaviour
+{
+
+    public playerrmovement movement;
+   
+   void OnCollisionEnter (Collision collisionInfo)
+   {
+       if (collisionInfo.collider.tag == "Obstacle")
+       {
+           movement.enabled = false;
+            FindObjectOfType<gamemanager>().EndGame();
+
+       }
+   }
+
+}
+
+playermovement.cs
+using UnityEngine;
+
+public class playerrmovement : MonoBehaviour
+{
+        public Rigidbody rb;
+
+        public float forwardForce = 2000f;
+        public float sidewayForce = 500f;
+
+    // Update is called once per frame
+    void FixedUpdate()
+    {
+      // Add a forward force
+      rb.AddForce(0, 0, forwardForce * Time.deltaTime);
+
+      if( Input.GetKey("d")) 
+      {
+         
+        rb.AddForce(sidewayForce * Time.deltaTime, 0, 0, ForceMode.VelocityChange);
+      }
+    
+      if( Input.GetKey("a")) 
+      {
+         
+        rb.AddForce(-sidewayForce * Time.deltaTime, 0, 0, ForceMode.VelocityChange);
+      }
+        if (rb.position.y < -1f)
+        {
+            FindObjectOfType<gamemanager>().EndGame();
+
+        }
+    }
+}
+
+followplayer.cs
+using UnityEngine;
+
+public class followplayer : MonoBehaviour
+{
+
+    public Transform player;
+    public Vector3 offset;
+
+
+
+    // Update is called once per frame
+    void Update()
+    {
+        transform.position = player.position + offset;
+    }
+}
